@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:provider/provider.dart';
+import '../screens/login_screen.dart'; // Add this import
 import '../screens/registration_screen.dart';
 import '../screens/profile_screen.dart';
 import '../services/auth_service.dart';
@@ -41,15 +41,15 @@ class AuthWrapper extends StatelessWidget {
               if (userSnapshot.hasData && userSnapshot.data != null) {
                 return ProfileScreen(user: userSnapshot.data!);
               } else {
-                // If for some reason we can't get user data, logout and go to registration
+                // If for some reason we can't get user data, logout and go to login
                 _authService.signOut();
-                return RegistrationScreen();
+                return LoginScreen(); // Changed to LoginScreen
               }
             },
           );
         } else {
-          // User is not logged in, go to registration screen
-          return RegistrationScreen();
+          // User is not logged in, go to login screen
+          return LoginScreen(); // Changed to LoginScreen
         }
       },
     );

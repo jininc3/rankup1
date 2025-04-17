@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'screens/registration_screen.dart';
+import 'screens/login_screen.dart'; // Add this import
 import 'screens/profile_screen.dart';
 import 'widgets/auth_wrapper.dart';
 import 'utils/theme.dart';
@@ -26,6 +27,7 @@ class MyApp extends StatelessWidget {
       home: AuthWrapper(),
       routes: {
         '/register': (context) => RegistrationScreen(),
+        '/login': (context) => LoginScreen(), // Add this route
         '/profile': (context) => ProfileScreen(),
       },
     );

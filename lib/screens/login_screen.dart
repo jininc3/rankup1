@@ -2,45 +2,39 @@ import 'package:flutter/material.dart';
 import '../models/user_model.dart';
 import '../services/auth_service.dart';
 
-class RegistrationScreen extends StatefulWidget {
+class LoginScreen extends StatefulWidget {
   @override
-  _RegistrationScreenState createState() => _RegistrationScreenState();
+  _LoginScreenState createState() => _LoginScreenState();
 }
 
-class _RegistrationScreenState extends State<RegistrationScreen> {
+class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _usernameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _confirmPasswordController = TextEditingController();
   
   final AuthService _authService = AuthService();
   
   bool _isLoading = false;
   bool _obscurePassword = true;
-  bool _obscureConfirmPassword = true;
 
   @override
   void dispose() {
-    _usernameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
-    _confirmPasswordController.dispose();
     super.dispose();
   }
 
-  Future<void> _register() async {
+  Future<void> _login() async {
     if (_formKey.currentState!.validate()) {
       setState(() {
         _isLoading = true;
       });
 
       try {
-        // Use the AuthService to register with Firebase
-        final user = await _authService.registerWithEmailAndPassword(
+        // Use the AuthService to login with Firebase
+        final user = await _authService.signInWithEmailAndPassword(
           email: _emailController.text,
           password: _passwordController.text,
-          username: _usernameController.text,
         );
         
         // Navigate to profile screen and pass the user data
@@ -52,7 +46,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       } catch (e) {
         // Show error message
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Registration failed: ${e.toString()}')),
+          SnackBar(content: Text('Login failed: ${e.toString()}')),
         );
       } finally {
         if (mounted) {
@@ -97,25 +91,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   ),
                   SizedBox(height: 32.0),
                   
-                  // Registration Form
-                  TextFormField(
-                    controller: _usernameController,
-                    decoration: InputDecoration(
-                      labelText: 'Username',
-                      prefixIcon: Icon(Icons.person),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter a username';
-                      }
-                      if (value.length < 3) {
-                        return 'Username must be at least 3 characters';
-                      }
-                      return null;
-                    },
-                  ),
-                  SizedBox(height: 16.0),
-                  
+                  // Login Form
                   TextFormField(
                     controller: _emailController,
                     decoration: InputDecoration(
@@ -125,7 +101,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     keyboardType: TextInputType.emailAddress,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter an email';
+                        return 'Please enter your email';
                       }
                       if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
                         return 'Please enter a valid email';
@@ -154,75 +130,55 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     obscureText: _obscurePassword,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter a password';
-                      }
-                      if (value.length < 6) {
-                        return 'Password must be at least 6 characters';
-                      }
-                      return null;
-                    },
-                  ),
-                  SizedBox(height: 16.0),
-                  
-                  TextFormField(
-                    controller: _confirmPasswordController,
-                    decoration: InputDecoration(
-                      labelText: 'Confirm Password',
-                      prefixIcon: Icon(Icons.lock),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscureConfirmPassword ? Icons.visibility : Icons.visibility_off,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            _obscureConfirmPassword = !_obscureConfirmPassword;
-                          });
-                        },
-                      ),
-                    ),
-                    obscureText: _obscureConfirmPassword,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please confirm your password';
-                      }
-                      if (value != _passwordController.text) {
-                        return 'Passwords do not match';
+                        return 'Please enter your password';
                       }
                       return null;
                     },
                   ),
                   SizedBox(height: 32.0),
                   
-                  // Register Button
+                  // Login Button
                   ElevatedButton(
-                    onPressed: _isLoading ? null : _register,
+                    onPressed: _isLoading ? null : _login,
                     child: _isLoading
                         ? CircularProgressIndicator(
                             valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                           )
-                        : Text('Register'),
+                        : Text('Login'),
                     style: ElevatedButton.styleFrom(
                       padding: EdgeInsets.symmetric(vertical: 16.0),
                     ),
                   ),
                   SizedBox(height: 16.0),
                   
-                  // Already have an account
-                  // Update only the "Already have an account" section in registration_screen.dart
-// Replace the existing Row with this updated one:
-
-Row(
-  mainAxisAlignment: MainAxisAlignment.center,
-  children: [
-    Text('Already have an account?'),
-    TextButton(
-      onPressed: () {
-        Navigator.pushReplacementNamed(context, '/login');
-      },
-      child: Text('Login'),
-    ),
-  ],
-),
+                  // Forgot Password
+                  Align(
+                    alignment: Alignment.center,
+                    child: TextButton(
+                      onPressed: () {
+                        // You can implement password reset functionality here
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Password reset functionality not implemented yet')),
+                        );
+                      },
+                      child: Text('Forgot Password?'),
+                    ),
+                  ),
+                  SizedBox(height: 16.0),
+                  
+                  // Don't have an account
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text('Don\'t have an account?'),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pushReplacementNamed(context, '/register');
+                        },
+                        child: Text('Register'),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),
