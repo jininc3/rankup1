@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../models/user_model.dart';
 import '../services/auth_service.dart';
+import '../widgets/flippable_player_card.dart';
+import '../screens/player_card_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   final UserModel? user;
@@ -62,33 +64,66 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
     },
   ];
 
-  // Mock game stats (we'll now show these in a different way)
-  final Map<String, Map<String, dynamic>> _mockGameStats = {
-    'Fortnite': {
-      'kills': 1240,
-      'wins': 87,
-      'kd': 2.5,
-      'playtime': '342h',
+  // Player cards data - moved to a state variable so we can update it
+  List<Map<String, dynamic>> _playerCards = [
+    {
+      'gameName': 'Valorant',
       'rank': 'Diamond',
-      'iconUrl': 'assets/fortnite_icon.png',
+      'mainCharacters': ['Jett', 'Reyna', 'Sage'],
+      'bio': 'Diamond ranked Valorant player specializing in entry fragging and team support.',
+      'username': 'ValorantPro',
+      'country': 'United States',
+      'stats': {
+        'kda': '1.8/3.2/4.5',
+        'win_rate_recent': '62',
+        'games_played': '347',
+        'total_matches': '526',
+        'champion_win_rates': [
+          {'name': 'Jett', 'win_rate': 68, 'icon': 'assets/images/jett.png'},
+          {'name': 'Reyna', 'win_rate': 59, 'icon': 'assets/images/reyna.png'},
+          {'name': 'Sage', 'win_rate': 72, 'icon': 'assets/images/sage.png'}
+        ]
+      }
     },
-    'Call of Duty': {
-      'kills': 3451,
-      'wins': 156,
-      'kd': 1.8,
-      'playtime': '523h',
+    {
+      'gameName': 'League of Legends',
       'rank': 'Platinum',
-      'iconUrl': 'assets/cod_icon.png',
+      'mainCharacters': ['Yasuo', 'Zed', 'Akali'],
+      'bio': 'Mid lane main with over 5 years of experience in ranked gameplay.',
+      'username': 'MidLaneKing',
+      'country': 'Canada',
+      'stats': {
+        'kda': '8.5/4.2/6.1',
+        'win_rate_recent': '55',
+        'games_played': '892',
+        'total_matches': '1248',
+        'champion_win_rates': [
+          {'name': 'Yasuo', 'win_rate': 62, 'icon': 'assets/images/yasuo.png'},
+          {'name': 'Zed', 'win_rate': 58, 'icon': 'assets/images/zed.png'},
+          {'name': 'Akali', 'win_rate': 65, 'icon': 'assets/images/akali.png'}
+        ]
+      }
     },
-    'Apex Legends': {
-      'kills': 2180,
-      'wins': 95,
-      'kd': 2.2,
-      'playtime': '280h',
+    {
+      'gameName': 'Fortnite',
       'rank': 'Gold',
-      'iconUrl': 'assets/apex_icon.png',
+      'mainCharacters': ['Assault Rifle', 'Shotgun', 'Sniper'],
+      'bio': 'Building specialist with focus on high-ground control and tactical positioning.',
+      'username': 'BuildMaster',
+      'country': 'Australia',
+      'stats': {
+        'kda': '3.4/2.1/0.0',
+        'win_rate_recent': '42',
+        'games_played': '524',
+        'total_matches': '982',
+        'champion_win_rates': [
+          {'name': 'Solo', 'win_rate': 38, 'icon': 'assets/images/solo.png'},
+          {'name': 'Duos', 'win_rate': 45, 'icon': 'assets/images/duos.png'},
+          {'name': 'Squads', 'win_rate': 52, 'icon': 'assets/images/squads.png'}
+        ]
+      }
     },
-  };
+  ];
   
   @override
   void initState() {
@@ -246,7 +281,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                   children: [
-                                    _buildStatColumn(_mockGameStats.length.toString(), 'Games'),
+                                    _buildStatColumn(_playerCards.length.toString(), 'Games'),
                                     _buildStatColumn(_followerCount.toString(), 'Followers'),
                                     _buildStatColumn(_followingCount.toString(), 'Following'),
                                   ],
@@ -325,8 +360,6 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                     
                     SizedBox(height: 10),
                     
-                    SizedBox(height: 10),
-                    
                     // Tabs (Posts, Game Stats)
                     TabBar(
                       controller: _tabController,
@@ -339,7 +372,8 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                     
                     // Tab content
                     Container(
-                      height: MediaQuery.of(context).size.width * 2 / 3, // Adjust based on your needs
+                      // Make this a flexible height based on content
+                      height: MediaQuery.of(context).size.height * 0.7,
                       child: TabBarView(
                         controller: _tabController,
                         children: [
@@ -360,33 +394,8 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                             },
                           ),
                           
-                          // Game Stats Tab
-                          ListView.builder(
-                            physics: NeverScrollableScrollPhysics(),
-                            itemCount: _mockGameStats.length,
-                            itemBuilder: (context, index) {
-                              String gameName = _mockGameStats.keys.elementAt(index);
-                              Map<String, dynamic> stats = _mockGameStats.values.elementAt(index);
-                              
-                              return ListTile(
-                                leading: CircleAvatar(
-                                  backgroundColor: Theme.of(context).primaryColor.withOpacity(0.2),
-                                  child: Icon(
-                                    Icons.games,
-                                    color: Theme.of(context).primaryColor,
-                                  ),
-                                ),
-                                title: Text(gameName),
-                                subtitle: Text('Rank: ${stats['rank']}'),
-                                trailing: Text('K/D: ${stats['kd']}'),
-                                onTap: () {
-                                  _showGameStatsBottomSheet(context, gameName, stats);
-                                },
-                              );
-                            },
-                          ),
-                          
-
+                          // Game Cards Tab
+                          _buildPlayerCardsTab(),
                         ],
                       ),
                     ),
@@ -394,6 +403,174 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                 ),
               ),
             ),
+    );
+  }
+
+  // New method to build the player cards tab
+  Widget _buildPlayerCardsTab() {
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'My Player Cards',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                TextButton.icon(
+                  icon: Icon(Icons.add),
+                  label: Text('Add Card'),
+                  onPressed: () async {
+                    // Navigate to Add Player Card screen and get the result back
+                    final result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => AddPlayerCardScreen()),
+                    );
+                    
+                    // If we got a result back, add it to our cards
+                    if (result != null && result is Map<String, dynamic>) {
+                      setState(() {
+                        _playerCards.add(result);
+                      });
+                      
+                      // Show success message
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Player card added successfully!')),
+                      );
+                    }
+                  },
+                ),
+              ],
+            ),
+          ),
+          
+          // Player cards list - handle empty state
+          _playerCards.isEmpty
+              ? _buildEmptyState()
+              : ListView.builder(
+                  physics: NeverScrollableScrollPhysics(),
+                  shrinkWrap: true,
+                  itemCount: _playerCards.length,
+                  itemBuilder: (context, index) {
+                    final card = _playerCards[index];
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 12.0),
+                      child: Dismissible(
+                        key: Key('card_${index}_${card['gameName']}'),
+                        background: Container(
+                          color: Colors.red,
+                          alignment: Alignment.centerRight,
+                          padding: EdgeInsets.only(right: 20),
+                          child: Icon(
+                            Icons.delete,
+                            color: Colors.white,
+                          ),
+                        ),
+                        direction: DismissDirection.endToStart,
+                        onDismissed: (direction) {
+                          setState(() {
+                            _playerCards.removeAt(index);
+                          });
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Player card removed'),
+                              action: SnackBarAction(
+                                label: 'UNDO',
+                                onPressed: () {
+                                  setState(() {
+                                    _playerCards.insert(index, card);
+                                  });
+                                },
+                              ),
+                            ),
+                          );
+                        },
+                        child: Center(
+                          child: FlippablePlayerCard(
+                            gameName: card['gameName'],
+                            rank: card['rank'],
+                            mainCharacters: List<String>.from(card['mainCharacters']),
+                            bio: card['bio'],
+                            username: card['username'],
+                            country: card['country'],
+                            stats: card['stats'],
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+          
+          // Add some padding at the bottom
+          SizedBox(height: 20),
+        ],
+      ),
+    );
+  }
+
+  // Empty state widget
+  Widget _buildEmptyState() {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 40),
+      alignment: Alignment.center,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.videogame_asset_outlined,
+            size: 64,
+            color: Colors.grey[400],
+          ),
+          SizedBox(height: 16),
+          Text(
+            'No player cards yet',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey[800],
+            ),
+          ),
+          SizedBox(height: 8),
+          Text(
+            'Add your first player card to showcase your gaming prowess!',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.grey[600],
+            ),
+          ),
+          SizedBox(height: 24),
+          ElevatedButton.icon(
+            onPressed: () async {
+              final result = await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => AddPlayerCardScreen()),
+              );
+              
+              if (result != null && result is Map<String, dynamic>) {
+                setState(() {
+                  _playerCards.add(result);
+                });
+                
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Player card added successfully!')),
+                );
+              }
+            },
+            icon: Icon(Icons.add),
+            label: Text('Add Your First Card'),
+            style: ElevatedButton.styleFrom(
+              padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -545,6 +722,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
     );
   }
 
+  // Keep this method for potential detailed view
   void _showGameStatsBottomSheet(BuildContext context, String gameName, Map<String, dynamic> stats) {
     showModalBottomSheet(
       context: context,

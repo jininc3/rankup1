@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'screens/registration_screen.dart';
-import 'screens/login_screen.dart'; // Add this import
+import 'screens/login_screen.dart';
 import 'screens/profile_screen.dart';
+import 'screens/player_card_screen.dart'; // Add this import
 import 'widgets/auth_wrapper.dart';
 import 'utils/theme.dart';
 import 'firebase_options.dart';
@@ -27,8 +28,9 @@ class MyApp extends StatelessWidget {
       home: AuthWrapper(),
       routes: {
         '/register': (context) => RegistrationScreen(),
-        '/login': (context) => LoginScreen(), // Add this route
+        '/login': (context) => LoginScreen(),
         '/profile': (context) => ProfileScreen(),
+        '/add_player_card': (context) => AddPlayerCardScreen(),
       },
     );
   }
